@@ -1,0 +1,122 @@
+{
+  "roasters": [
+    {
+      "name": "Christopher L",
+      "city": "Los Angeles",
+      "state": "CA",
+      "country": "US",
+      "details": {
+        "website": "https://chrjl.dev",
+        "profiles": [
+          {
+            "network": "github",
+            "handle": "chrjl",
+            "url": "https://github.com/chrjl"
+          }
+        ]
+      },
+      "equipment_brand": "BocaBoca",
+      "equipment_model": "250",
+      "equipment_capacity": "0.25"
+    },
+    {
+      "name": "Go Get Em Tiger",
+      "city": "Los Angeles",
+      "state": "CA",
+      "country": "US",
+      "details": {
+        "website": "https://gget.com",
+        "profiles": [
+          {
+            "network": "facebook",
+            "handle": "ggetla",
+            "url": "https://facebook.com/ggetla"
+          },
+          {
+            "network": "instagram",
+            "handle": "ggetla",
+            "url": "https://instagram.com/ggetla"
+          }
+        ],
+        "locations": [
+          {
+            "name": "Grand Central Market",
+            "type": "coffeebar",
+            "address": "317 S Broadway",
+            "city": "Los Angeles",
+            "state": "CA",
+            "zipcode": 90013
+          },
+          {
+            "name": "Larchmont Village",
+            "type": "coffeebar",
+            "address": "230 N Larchmont",
+            "city": "Los Angeles",
+            "state": "CA",
+            "zipcode": 90004
+          }
+        ]
+      }
+    }
+  ],
+  "roasted_coffees": [
+    {
+      "name": "Privam Estate AA Week 23",
+      "roaster": "Christopher L",
+      "is_blend": false
+    },
+    {
+      "name": "Tariku Kare",
+      "roaster": "Christopher L",
+      "is_blend": false
+    },
+    {
+      "name": "Minor Monuments",
+      "roaster": "Go Get Em Tiger",
+      "is_blend": true,
+      "profile": ["espresso"],
+      "notes": ["brown sugar", "plum", "dark chocolate"],
+      "prices": [
+        {
+          "description": "retail",
+          "price": 20,
+          "quantity": 10.5,
+          "unit": "oz"
+        },
+        {
+          "description": "subscription",
+          "price": 18,
+          "quantity": 10.5,
+          "unit": "oz"
+        },
+        {
+          "description": "retail",
+          "price": 125,
+          "quantity": 5,
+          "unit": "kg"
+        }
+      ]
+    },
+    {
+      "name": "Placer de la Tarde",
+      "roaster": "Go Get Em Tiger",
+      "is_blend": false,
+      "profile": ["decaf", "espresso"],
+      "notes": ["brownie", "black forest cake", "cherry"],
+      "prices": [
+        {
+          "description": "retail",
+          "price": 21,
+          "quantity": 10.5,
+          "unit": "oz"
+        },
+        {
+          "description": "retail",
+          "price": 140,
+          "quantity": 5,
+          "unit": "kg"
+        }
+      ]
+    }
+  ]
+}
