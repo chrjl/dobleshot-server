@@ -1,5 +1,6 @@
 from sqlalchemy import ForeignKey, String, ARRAY, JSON, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from sqlalchemy.ext.associationproxy import association_proxy
 from datetime import datetime
 
 
@@ -45,10 +46,20 @@ class RoastedCoffee(Base):
     )
     prices = mapped_column(JSON)
     date_added: Mapped[datetime] = mapped_column(default=func.now())
-    date_updated: Mapped[datetime | None]
+    date_updated: Mapped[datetime | None] = mapped_column(default=func.now())
     date_removed: Mapped[datetime | None]
 
     roaster = relationship("Roaster", back_populates="coffees")
+    component_associations = relationship(
+        "CoffeeComponent",
+        back_populates="roasted_coffee",
+        cascade="all, delete-orphan",
+    )
+    components = association_proxy(
+        "component_associations",
+        "green_coffee",
+        creator=lambda g: CoffeeComponent(green_coffee=g),
+    )
 
 
 class Origin(Base):
@@ -58,6 +69,8 @@ class Origin(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     region: Mapped[str | None]
     country: Mapped[str]
+
+    coffees = relationship("GreenCoffee", back_populates="origin")
 
 
 class GreenCoffee(Base):
@@ -76,3 +89,26 @@ class GreenCoffee(Base):
     region_id = mapped_column(ForeignKey("origins.id"))
     varieties = mapped_column(ARRAY(String))
     details = mapped_column(JSON)
+
+    origin = relationship("Origin", back_populates="coffees")
+
+
+class CoffeeComponent(Base):
+    __tablename__ = "roasted_coffee_components"
+    __tableargs__ = {
+        "comment": "Association table linking roasted coffees and green coffees."
+    }
+
+    roasted_id = mapped_column(ForeignKey("roasted_coffees.id"), primary_key=True)
+    green_id = mapped_column(ForeignKey("green_coffees.id"), primary_key=True)
+    fraction: Mapped[int | None] = mapped_column(
+        comment="Percentage of blend constituted by green coffee."
+    )
+    date_added: Mapped[datetime] = mapped_column(default=func.now())
+    date_updated: Mapped[datetime | None] = mapped_column(default=func.now())
+    date_removed: Mapped[datetime | None]
+
+    green_coffee = relationship("GreenCoffee")
+    roasted_coffee = relationship(
+        "RoastedCoffee", back_populates="component_associations"
+    )
