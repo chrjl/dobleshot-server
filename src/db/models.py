@@ -77,7 +77,9 @@ class GreenCoffee(Base):
     __tablename__ = "green_coffees"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str]
+    name: Mapped[str | None] = mapped_column(
+        comment="Green coffees without an assigned name refer to generic/unknown coffee of the specified region."
+    )
     process: Mapped[str | None]
     source: Mapped[str | None] = mapped_column(
         comment="The lowest level of traceability of the coffee, e.g. a farm name, cooperative, wet mill."
