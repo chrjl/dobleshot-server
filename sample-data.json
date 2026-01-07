@@ -1,11 +1,17 @@
 {
   "origins": {
-    "ET": ["Sidama"],
-    "KE": ["Embu"],
-    "HN": [],
-    "GT": [],
-    "CO": ["Huila"]
+    "GT": [
+      "Acatenango",
+      "Antigua",
+      "Atitlán",
+      "Cobán",
+      "Huehuetenango",
+      "Fraijanes",
+      "Nuevo Oriente",
+      "San Marcos"
+    ]
   },
+
   "roasters": [
     {
       "name": "Christopher L",
@@ -24,7 +30,32 @@
       },
       "equipment_brand": "BocaBoca",
       "equipment_model": "250",
-      "equipment_capacity": "0.25"
+      "equipment_capacity": "0.25",
+
+      "roasted_coffees": [
+        {
+          "name": "Privam Estate AA Week 23",
+          "is_blend": false,
+          "components": [
+            {
+              "name": "Privam Estate AA Week 23",
+              "country": "KE",
+              "region": "Embu"
+            }
+          ]
+        },
+        {
+          "name": "Tariku Kare",
+          "is_blend": false,
+          "components": [
+            {
+              "name": "Tariku Kare",
+              "country": "ET",
+              "region": "Sidama"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "Go Get Em Tiger",
@@ -63,97 +94,102 @@
             "zipcode": 90004
           }
         ]
-      }
+      },
+
+      "roasted_coffees": [
+        {
+          "name": "Minor Monuments",
+          "is_blend": true,
+          "profile": ["espresso"],
+          "notes": ["brown sugar", "plum", "dark chocolate"],
+          "prices": [
+            {
+              "description": "retail",
+              "price": 20,
+              "quantity": 10.5,
+              "unit": "oz"
+            },
+            {
+              "description": "subscription",
+              "price": 18,
+              "quantity": 10.5,
+              "unit": "oz"
+            },
+            {
+              "description": "retail",
+              "price": 125,
+              "quantity": 5,
+              "unit": "kg"
+            }
+          ],
+          "components": [{ "country": "HN" }, { "country": "GT" }]
+        },
+        {
+          "name": "Humbuggle: A Holiday Blend",
+          "is_blend": true,
+          "profile": ["filter"],
+          "notes": ["chocolate", "cherry", "geranium"],
+          "prices": [
+            {
+              "description": "retail",
+              "price": 24,
+              "quantity": 10.5,
+              "unit": "oz"
+            },
+            {
+              "description": "retail",
+              "price": 150,
+              "quantity": 5,
+              "unit": "kg"
+            }
+          ],
+          "components": [
+            { "country": "CO" },
+            { "country": "GT" },
+            { "country": "KE" }
+          ]
+        },
+        {
+          "name": "Placer de la Tarde",
+          "is_blend": false,
+          "profile": ["decaf", "espresso"],
+          "notes": ["brownie", "black forest cake", "cherry"],
+          "prices": [
+            {
+              "description": "retail",
+              "price": 21,
+              "quantity": 10.5,
+              "unit": "oz"
+            },
+            {
+              "description": "retail",
+              "price": 140,
+              "quantity": 5,
+              "unit": "kg"
+            }
+          ],
+          "components": [
+            {
+              "name": "Placer de la Tarde",
+              "country": "CO",
+              "region": "Huila"
+            }
+          ]
+        }
+      ]
     }
   ],
-  "roasted_coffees": [
-    {
-      "name": "Privam Estate AA Week 23",
-      "roaster": "Christopher L",
-      "is_blend": false
-    },
-    {
-      "name": "Tariku Kare",
-      "roaster": "Christopher L",
-      "is_blend": false
-    },
-    {
-      "name": "Minor Monuments",
-      "roaster": "Go Get Em Tiger",
-      "is_blend": true,
-      "profile": ["espresso"],
-      "notes": ["brown sugar", "plum", "dark chocolate"],
-      "prices": [
-        {
-          "description": "retail",
-          "price": 20,
-          "quantity": 10.5,
-          "unit": "oz"
-        },
-        {
-          "description": "subscription",
-          "price": 18,
-          "quantity": 10.5,
-          "unit": "oz"
-        },
-        {
-          "description": "retail",
-          "price": 125,
-          "quantity": 5,
-          "unit": "kg"
-        }
-      ]
-    },
-    {
-      "name": "Humbuggle: A Holiday Blend",
-      "roaster": "Go Get Em Tiger",
-      "is_blend": true,
-      "profile": ["filter"],
-      "notes": ["chocolate", "cherry", "geranium"],
-      "prices": [
-        {
-          "description": "retail",
-          "price": 24,
-          "quantity": 10.5,
-          "unit": "oz"
-        },
-        {
-          "description": "retail",
-          "price": 150,
-          "quantity": 5,
-          "unit": "kg"
-        }
-      ]
-    },
-    {
-      "name": "Placer de la Tarde",
-      "roaster": "Go Get Em Tiger",
-      "is_blend": false,
-      "profile": ["decaf", "espresso"],
-      "notes": ["brownie", "black forest cake", "cherry"],
-      "prices": [
-        {
-          "description": "retail",
-          "price": 21,
-          "quantity": 10.5,
-          "unit": "oz"
-        },
-        {
-          "description": "retail",
-          "price": 140,
-          "quantity": 5,
-          "unit": "kg"
-        }
-      ]
-    }
-  ],
+
   "green_coffees": [
     {
       "name": "Privam Estate AA Week 23",
       "process": "washed",
       "source": "Privam Estate",
       "source_type": "single estate",
-      "region": "Embu",
+      "origin": {
+        "country": "KE",
+        "region": "Embu"
+      },
       "varieties": ["Batian", "Ruiru 11", "SL28"],
       "details": {
         "harvest_year": 2024,
@@ -172,9 +208,12 @@
       "process": "washed",
       "source": "Tariku Kare",
       "source_type": "wet mill",
-      "community": "Bombe",
-      "region": "Sidama",
-      "varieties": ["Ethiopian heirloom"],
+      "origin": {
+        "country": "ET",
+        "region": "Sidama",
+        "community": "Bombe"
+      },
+      "varieties": ["heirloom"],
       "details": {
         "harvest_year": 2024,
         "supplier": "Showroom Coffee",
@@ -189,10 +228,14 @@
     },
     {
       "name": "Placer de la Tarde",
-      "process": "sugarcane decaf",
-      "community": "San Agustin",
-      "region": "Huila",
+      "process": "decaf",
+      "origin": {
+        "country": "CO",
+        "region": "Huila",
+        "community": "San Agustin"
+      },
       "details": {
+        "processing": "sugarcane decaf",
         "references": [
           {
             "type": "website",
