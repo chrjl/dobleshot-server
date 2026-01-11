@@ -50,8 +50,8 @@ def main():
                 process=green_data.get("process"),
                 source=green_data.get("source"),
                 source_type=green_data.get("source_type"),
-                varieties=green_data.get("varieties"),
-                details=green_data.get("details"),
+                varieties=green_data.get("varieties", []),
+                details=green_data.get("details", {}),
                 origin=origin,
                 community=community,
             )
@@ -64,7 +64,7 @@ def main():
                 city=roaster_data.get("city"),
                 state=roaster_data.get("state"),
                 country=roaster_data.get("country"),
-                details=roaster_data.get("details"),
+                details=roaster_data.get("details", {}),
                 equipment_brand=roaster_data.get("equipment_brand"),
                 equipment_model=roaster_data.get("equipment_model"),
                 equipment_capacity=roaster_data.get("equipment_capacity"),
@@ -76,9 +76,9 @@ def main():
                 coffee = RoastedCoffee(
                     name=coffee_data.get("name"),
                     is_blend=coffee_data.get("is_blend"),
-                    profile=coffee_data.get("profile"),
-                    notes=coffee_data.get("notes"),
-                    prices=coffee_data.get("prices"),
+                    profile=coffee_data.get("profile", []),
+                    notes=coffee_data.get("notes", []),
+                    prices=coffee_data.get("prices", []),
                 )
 
                 for component_data in coffee_data.get("components", []):

@@ -1,11 +1,17 @@
-from sqlalchemy import ForeignKey, String, ARRAY, JSON, func
+from sqlalchemy import ForeignKey, JSON, String, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
-from sqlalchemy.ext.associationproxy import association_proxy
+from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
+from sqlalchemy.ext.mutable import MutableList, MutableDict
 from datetime import datetime
+from typing import Any
 
 
 class Base(DeclarativeBase):
-    pass
+    type_annotation_map = {
+        list[str]: MutableList.as_mutable(JSON),
+        list[dict]: MutableList.as_mutable(JSON),
+        dict: MutableDict.as_mutable(JSON),
+    }
 
 
 class Roaster(Base):
@@ -14,17 +20,19 @@ class Roaster(Base):
     name: Mapped[str]
     city: Mapped[str | None]
     state: Mapped[str | None]
-    country: Mapped[str | None]
-    details = mapped_column(
-        JSON,
+    country: Mapped[str] = mapped_column(
+        String(length=2), comment="Two letter country code (ISO 3166-1 alpha-2)"
+    )
+    details: Mapped[dict] = mapped_column(
         nullable=True,
+        server_default="{}",
         comment="Can include contact information, website, socials profiles, location details, etc.",
     )
     equipment_brand: Mapped[str | None]
     equipment_model: Mapped[str | None]
     equipment_capacity: Mapped[float | None]
 
-    coffees = relationship("RoastedCoffee", back_populates="roaster")
+    coffees: Mapped[list["RoastedCoffee"]] = relationship(back_populates="roaster")
 
 
 class RoastedCoffee(Base):
@@ -35,27 +43,30 @@ class RoastedCoffee(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str]
-    roaster_id = mapped_column(ForeignKey("roasters.id"), nullable=False)
+    roaster_id: Mapped[int] = mapped_column(ForeignKey("roasters.id"))
     is_blend: Mapped[bool]
-    profile = mapped_column(
-        ARRAY(String),
+
+    profile: Mapped[list[str]] = mapped_column(
+        server_default="[]",
         comment="A list of the roaster's intended roast attributes, e.g. dark roast, espresso, cold brew.",
     )
-    notes = mapped_column(
-        ARRAY(String), comment="A list of the roaster's tasting notes."
+    notes: Mapped[list[str]] = mapped_column(
+        server_default="[]",
+        comment="A list of the roaster's tasting notes.",
     )
-    prices = mapped_column(JSON)
-    date_added: Mapped[datetime] = mapped_column(default=func.now())
-    date_updated: Mapped[datetime | None] = mapped_column(default=func.now())
+    prices: Mapped[list[dict]] = mapped_column(server_default="[]")
+    date_added: Mapped[datetime] = mapped_column(server_default=func.now())
+    date_updated: Mapped[datetime | None] = mapped_column(
+        server_default=func.now(), onupdate=func.now()
+    )
     date_removed: Mapped[datetime | None]
 
-    roaster = relationship("Roaster", back_populates="coffees")
-    component_associations = relationship(
-        "CoffeeComponent",
+    roaster: Mapped["Roaster"] = relationship(back_populates="coffees")
+    component_associations: Mapped[list["CoffeeComponent"]] = relationship(
         back_populates="roasted_coffee",
         cascade="all, delete-orphan",
     )
-    components = association_proxy(
+    components: AssociationProxy[list["GreenCoffee"]] = association_proxy(
         "component_associations",
         "green_coffee",
         creator=lambda g: CoffeeComponent(green_coffee=g),
@@ -67,10 +78,12 @@ class Origin(Base):
     __tableargs__ = {"comment": "Geographical origins of green coffees."}
 
     id: Mapped[int] = mapped_column(primary_key=True)
+    country: Mapped[str] = mapped_column(
+        String(length=2), comment="Two letter country code (ISO 3166-1 alpha-2)"
+    )
     region: Mapped[str | None]
-    country: Mapped[str]
 
-    coffees = relationship("GreenCoffee", back_populates="origin")
+    coffees: Mapped[list["GreenCoffee"]] = relationship(back_populates="origin")
 
 
 class GreenCoffee(Base):
@@ -80,6 +93,8 @@ class GreenCoffee(Base):
     name: Mapped[str | None] = mapped_column(
         comment="Green coffees without an assigned name refer to generic/unknown coffee of the specified region."
     )
+    region_id: Mapped[int | None] = mapped_column(ForeignKey("origins.id"))
+
     process: Mapped[str | None]
     source: Mapped[str | None] = mapped_column(
         comment="The lowest level of traceability of the coffee, e.g. a farm name, cooperative, wet mill."
@@ -88,11 +103,10 @@ class GreenCoffee(Base):
         comment="e.g. single estate, microlot, smallholder, cooperative, wet mill, purchasing station"
     )
     community: Mapped[str | None]
-    region_id = mapped_column(ForeignKey("origins.id"))
-    varieties = mapped_column(ARRAY(String))
-    details = mapped_column(JSON)
+    varieties: Mapped[list[str]] = mapped_column(server_default="[]")
+    details: Mapped[dict] = mapped_column(server_default="{}")
 
-    origin = relationship("Origin", back_populates="coffees")
+    origin: Mapped["Origin"] = relationship(back_populates="coffees")
 
 
 class CoffeeComponent(Base):
@@ -101,16 +115,22 @@ class CoffeeComponent(Base):
         "comment": "Association table linking roasted coffees and green coffees."
     }
 
-    roasted_id = mapped_column(ForeignKey("roasted_coffees.id"), primary_key=True)
-    green_id = mapped_column(ForeignKey("green_coffees.id"), primary_key=True)
+    roasted_id: Mapped[int] = mapped_column(
+        ForeignKey("roasted_coffees.id"), primary_key=True
+    )
+    green_id: Mapped[int] = mapped_column(
+        ForeignKey("green_coffees.id"), primary_key=True
+    )
     fraction: Mapped[int | None] = mapped_column(
         comment="Percentage of blend constituted by green coffee."
     )
-    date_added: Mapped[datetime] = mapped_column(default=func.now())
-    date_updated: Mapped[datetime | None] = mapped_column(default=func.now())
+    date_added: Mapped[datetime] = mapped_column(server_default=func.now())
+    date_updated: Mapped[datetime | None] = mapped_column(
+        server_default=func.now(), onupdate=func.now()
+    )
     date_removed: Mapped[datetime | None]
 
-    green_coffee = relationship("GreenCoffee")
-    roasted_coffee = relationship(
-        "RoastedCoffee", back_populates="component_associations"
+    green_coffee: Mapped["GreenCoffee"] = relationship()
+    roasted_coffee: Mapped["RoastedCoffee"] = relationship(
+        back_populates="component_associations"
     )
