@@ -4,6 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 from db.main import engine
 from db.models import Origin, Roaster, RoastedCoffee, GreenCoffee, CoffeeComponent
+from db.utilities import is_in_model
 
 
 def main():
@@ -46,39 +47,33 @@ def main():
             )
 
             green_coffee = GreenCoffee(
-                name=green_data.get("name"),
-                process=green_data.get("process"),
-                source=green_data.get("source"),
-                source_type=green_data.get("source_type"),
-                varieties=green_data.get("varieties", []),
-                details=green_data.get("details", {}),
-                origin=origin,
-                community=community,
+                **{
+                    **{
+                        k: v
+                        for k, v in green_data.items()
+                        if is_in_model(GreenCoffee, k)
+                    },
+                    "origin": origin,
+                    "community": community,
+                }
             )
 
             session.add(green_coffee)
 
         for roaster_data in data["roasters"]:
             roaster = Roaster(
-                name=roaster_data.get("name"),
-                city=roaster_data.get("city"),
-                state=roaster_data.get("state"),
-                country=roaster_data.get("country"),
-                details=roaster_data.get("details", {}),
-                equipment_brand=roaster_data.get("equipment_brand"),
-                equipment_model=roaster_data.get("equipment_model"),
-                equipment_capacity=roaster_data.get("equipment_capacity"),
+                **{k: v for k, v in roaster_data.items() if is_in_model(Roaster, k)}
             )
 
             session.add(roaster)
 
             for coffee_data in roaster_data["roasted_coffees"]:
                 coffee = RoastedCoffee(
-                    name=coffee_data.get("name"),
-                    is_blend=coffee_data.get("is_blend"),
-                    profile=coffee_data.get("profile", []),
-                    notes=coffee_data.get("notes", []),
-                    prices=coffee_data.get("prices", []),
+                    **{
+                        k: v
+                        for k, v in coffee_data.items()
+                        if (is_in_model(RoastedCoffee, k) and k not in ["component"])
+                    }
                 )
 
                 for component_data in coffee_data.get("components", []):

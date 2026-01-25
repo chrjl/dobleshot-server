@@ -17,6 +17,13 @@
       "description": "Additional details provided about processing.",
       "type": "string"
     },
+    "producer": {
+      "description": "A single name (or array of names) of producers corresponding to the coffee source attribute.",
+      "anyOf": [
+        { "type": "string" },
+        { "type": "array", "items": { "type": "string" } }
+      ]
+    },
     "references": {
       "description": "Source of additional details",
       "type": "array",

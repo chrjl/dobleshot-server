@@ -1,4 +1,24 @@
 from sqlalchemy import URL, make_url
+from sqlalchemy.orm import DeclarativeBase, class_mapper
+
+
+def is_in_model(model: type[DeclarativeBase], key: str, *args) -> bool:
+    """
+    Checks whether an input string is an attribute of the provided SQLAlchemy
+    mapped class. For use in filtering dictionaries by key.
+
+    Examples:
+        >>> [key for key in ["id", "name", "foo"] if is_in_model(Roaster, key))]
+        ["id", "name"]
+
+        >>> [*filter(lambda key: is_in_model(Roaster, key), ["id", "name", "foo"])]
+        ["id", "name"]
+
+        >>> {k: v for k, v in {"id": 1, "foo": "bar}.items() if is_in_model(Roaster, k))]
+        {"id": 1}
+    """
+
+    return key in class_mapper(model).attrs.keys()
 
 
 def generate_url(

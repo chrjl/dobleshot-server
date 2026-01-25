@@ -42,7 +42,9 @@
               "country": "KE",
               "region": "Embu"
             }
-          ]
+          ],
+          "date_added": "2025-11-27",
+          "date_removed": "2026-01-15"
         },
         {
           "name": "Tariku Kare",
@@ -53,7 +55,33 @@
               "country": "ET",
               "region": "Sidama"
             }
-          ]
+          ],
+          "date_added": "2025-11-27",
+          "date_removed": "2026-01-15"
+        },
+        {
+          "name": "Dukorere Kawa Anaerobic Lot 10",
+          "is_blend": false,
+          "components": [
+            {
+              "name": "Dukorere Kawa Anaerobic Lot 10",
+              "country": "RW",
+              "region": "Northern"
+            }
+          ],
+          "date_added": "2026-01-27"
+        },
+        {
+          "name": "Salomon Estela Marshell Natural K56",
+          "is_blend": false,
+          "components": [
+            {
+              "name": "Salomon Estela Marshell Natural K56",
+              "country": "PE",
+              "region": "Cajamarca"
+            }
+          ],
+          "date_added": "2026-01-27"
         }
       ]
     },
@@ -122,7 +150,8 @@
               "unit": "kg"
             }
           ],
-          "components": [{ "country": "HN" }, { "country": "GT" }]
+          "components": [{ "country": "HN" }, { "country": "GT" }],
+          "date_added": "2025-11-27"
         },
         {
           "name": "Humbuggle: A Holiday Blend",
@@ -147,7 +176,9 @@
             { "country": "CO" },
             { "country": "GT" },
             { "country": "KE" }
-          ]
+          ],
+          "date_added": "2025-11-27",
+          "date_removed": "2026-01-01"
         },
         {
           "name": "Placer de la Tarde",
@@ -174,7 +205,8 @@
               "country": "CO",
               "region": "Huila"
             }
-          ]
+          ],
+          "date_added": "2025-11-27"
         }
       ]
     }
@@ -185,7 +217,7 @@
       "name": "Privam Estate AA Week 23",
       "process": "washed",
       "source": "Privam Estate",
-      "source_type": "single estate",
+      "source_type": "estate",
       "origin": {
         "country": "KE",
         "region": "Embu"
@@ -222,6 +254,51 @@
           {
             "type": "website",
             "url": "https://www.croptocup.com/community/tariku-kare/"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Dukorere Kawa Anaerobic Lot 10",
+      "process": "washed",
+      "source": "Dukorere Kawa",
+      "source_type": "cooperative",
+      "origin": {
+        "country": "RW",
+        "region": "Northern",
+        "community": "Bukure"
+      },
+      "varieties": ["bourbon"],
+      "details": {
+        "harvest_year": 2025,
+        "supplier": "Showroom Coffee",
+        "processing": "anerobic",
+        "references": [
+          {
+            "type": "website",
+            "url": "https://showroomcoffee.com/product/dukorere-kawa-bukure-nova-washing-station-anaerobic-lot-10/"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Salomon Estela Marshell Natural K56",
+      "process": "natural",
+      "source": "El Pino",
+      "source_type": "producer",
+      "origin": {
+        "country": "PE",
+        "region": "Cajamarca"
+      },
+      "varieties": ["marshell"],
+      "details": {
+        "harvest_year": 2025,
+        "producer_name": "Salomon Estela",
+        "supplier": "Showroom Coffee",
+        "references": [
+          {
+            "type": "website",
+            "url": "https://showroomcoffee.com/product/salomon-estela-el-pino-marshell-natural-k56/"
           }
         ]
       }
