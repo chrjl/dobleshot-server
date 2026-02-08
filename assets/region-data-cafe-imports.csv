@@ -1,0 +1,31 @@
+country_id,region,processes,varieties,harvest_start,harvest_end
+BO,,washed;natural,typica;red catuai,6,10
+BR,,honey;natural;washed,bourbon;catimor;catuai;caturra;maragogype;typica,4,9
+BI,,washed;natural,bourbon;french mission bourbon;jackson;mibirzi,3,7
+CO,,washed,bourbon;castillo;catimor;caturra;colombia;typica,11,1
+CR,,washed;natural;honey,caturra;catuai;bourbon;villa sarchi;villa lobos;sl-28;gesha,12,4
+CD,,washed,bourbon;bourbon mayaguez,3,7
+EC,,washed;natural;honey,bourbon;typica;caturra;sidra,,
+SV,,washed,bourbon;pacamara;pacas;typica,11,4
+ET,,washed;natural,heirloom;kudhome;gesha;djimma,10,1
+GT,,washed,bourbon;caturra;catuai;typica;maragogype;pache,9,4
+HN,,washed,bourbon;caturra;catuai;ihcafe 90;lempira;typica,11,4
+IN,,washed;natural;monsoon malabar,kent;tafarikela;san ramon;catuai;cauvery;typica,11,1
+JM,,washed,bourbon;typica;blue mountain,2,6
+KE,,washed,sl-28;sl-34;french mission bourbon;ruiru 11;batian;k7,8,1
+MW,,washed,bourbon;catimor;caturra;gesha;population 3;sl-28,4,9
+MX,,washed,bourbon;typica;caturra;mundo novo;maragogype;catimor;catuai;garnica,11,3
+NI,,washed,bourbon;catuai;catimor;caturra;maracaturra;maragogype,10,3
+PA,,washed;natural,catuai;caturra;geisha;mundo novo,11,3
+PG,,washed,arusha;blue mountain;typica,5,9
+PE,,washed,bourbon;typica;catuai;caturra;mundo novo;pache,6,9
+RW,,washed;natural;honey,bourbon;french mission bourbon;caturra;catuai;mibirizi,3,6
+TZ,,washed,arusha;bourbon;blue mountain;kent,5,9
+VE,,washed;honey;natural,,9,1
+YE,,natural,dawairi;jaadi;tuffahi,10,3
+ID,Bali,washed;natural,s795;timor hybrid,5,10
+ID,Flores,washed;natural,kartika;caturra;timor hybrid,5,7
+ID,Java,wet-hulled,ateng;catimor;tim tim;typica,7,9
+ID,Sulawesi,washed;wet-hulled,jember;typica;s795,5,11
+ID,Sumatra,wet-hulled,bourbon;catimor;caturra;tim tim,5,11
+US,Hawaii,washed,bourbon;typica,8,12

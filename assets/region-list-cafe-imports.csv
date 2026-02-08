@@ -1,0 +1,162 @@
+country_id,region,subregions
+BO,La Paz
+BO,La Asunta
+BO,Caranavi
+BO,Cochabamba
+BO,Teoponte
+BR,Bahia
+BR,Espírito Santo
+BR,Minas Gerais,Carmo de Minas;Cerrado Mineiro;Sul de Minas
+BR,Nambuco
+BR,Paraná
+BR,San Janeiro
+BR,São Paulo,Mogiana
+BI,Gitega
+BI,Karuzi
+BI,Kayanza
+BI,Kirundo
+BI,Muyinga
+BI,Ngozi
+CO,Antioquia
+CO,Boyacá
+CO,Caldas
+CO,Cauca
+CO,Cesar
+CO,Caquetá
+CO,Casanare
+CO,Cundinamarca
+CO,Guajira
+CO,Huila
+CO,Magdalena
+CO,Meta
+CO,Nariño
+CO,Quindío
+CO,Risaralda
+CO,Santander
+CO,Tolima
+CO,Valle
+CR,Central Valley
+CR,West Valley
+CR,Guanacaste
+CR,Tres Ríos
+CR,Turrialba
+CR,Orosi
+CR,Brunca
+CR,Tarrazú
+CD,Ituri
+CD,Nord-Kivu
+CD,Sud-Kivu
+EC,Carchi
+EC,El Oro
+EC,Loja
+EC,Galapagos
+EC,Manabi
+EC,Pichincha
+EC,Zamora-Chinchipe
+SV,Apaneca
+SV,Apaneca-Llamatepec
+SV,El Bálsamo–Quetzaltepec
+SV,Cacahuatique
+SV,Chalatenango
+SV,Chinchontepec
+SV,Metapán
+SV,Santa Ana
+SV,Tecapa-Chinameca
+ET,Sidama,Yirgacheffe
+ET,Harrar
+ET,Limu
+ET,Djimma
+ET,Lekempti
+ET,Wallega
+ET,Gimbi
+GT,Acatenango
+GT,Antigua
+GT,Atitlán
+GT,Chimaltenango
+GT,Cobán
+GT,Fraijanes
+GT,Huehuetenango
+GT,Nuevo Oriente
+HN,Agalta
+HN,Comayagua
+HN,Copán
+HN,Mentecillos
+HN,Opalca
+HN,El Paraiso
+ID,Bali,Kintamani
+ID,Flores,Manggarai;Bajawa;Kelimutu
+ID,Java,Ijen Plateau
+ID,Sulawesi,Enrekang;Gowa;Mamasa;Sinjai;Tana Toraja
+ID,Sumatra,Aceh/Gayo;Lintong;Takengon/Bener Meriah
+IN,Karnataka
+IN,Tamil Nadu
+IN,Kerala
+JM,Blue Mountain
+KE,Bungoma
+KE,Embu
+KE,Kiambu
+KE,Kirinyaga
+KE,Kisii
+KE,Machakos
+KE,Mt. Elgon
+KE,Murang'a
+KE,Nakuru
+KE,Nyeri
+KE,Taita Taveta
+KE,Thika
+KE,Tran-Nzoia
+MW,Misuku Hills
+MX,Chiapas
+MX,Colima
+MX,Guerrero
+MX,Hidalgo
+MX,Jalisco
+MX,Michoacán
+MX,Nayarit
+MX,Oaxaca
+MX,Puebla
+MX,San Luis Potosí
+MX,Veracruz
+NI,Jinotega
+NI,Matagalpa
+NI,Nueva Segovia
+PA,Boquete
+PA,Renacimiento
+PA,Volcán
+PG,Chivu
+PG,Eastern Highlands
+PG,Western Highlands
+PE,Amazonas
+PE,Ayacucho
+PE,Cajamarca
+PE,Cusco
+PE,Huánaco
+PE,Junin
+PE,Pura
+PE,Puno
+PE,Villa Rica
+RW,Western,Kabrizi;Lake Kivu;Gishamwana Island
+RW,Southern,Butare;Nyanza
+RW,Northern,Rulindo
+RW,Eastern,Ngoma District
+TZ,Arusha
+TZ,Kigoma
+TZ,Kilimanjaro
+TZ,Mbeya
+TZ,Ruvuma
+TZ,Tarime
+US,Hawaii,Kona;Ka'u
+US,Maui
+US,O'ahu
+VE,Lara
+VE,Portuguesa
+VE,Anzoátegui
+VE,Trujillo
+VE,Táchira
+VE,Monagas
+VE,Mérida
+YE,Bani Mater
+YE,Bani Hammad
+YE,Bura'a
+YE,Haraaz
+YE,Haimateen

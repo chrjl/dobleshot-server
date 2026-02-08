@@ -18,7 +18,7 @@ def is_in_model(model: type[DeclarativeBase], key: str, *args) -> bool:
         {"id": 1}
     """
 
-    return key in class_mapper(model).attrs.keys()
+    return key in class_mapper(model).column_attrs.keys()
 
 
 def generate_url(

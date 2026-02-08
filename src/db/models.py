@@ -1,5 +1,6 @@
 from sqlalchemy import ForeignKey, JSON, String, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from sqlalchemy.orm.exc import DetachedInstanceError
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.ext.mutable import MutableList, MutableDict
 from datetime import datetime
@@ -10,10 +11,13 @@ def getdeepattr(obj: Any, attr: str, default: Any = None):
     result = obj
 
     for a in attr.split("."):
-        if not hasattr(result, a):
-            return default
+        try:
+            if not hasattr(result, a):
+                return default
 
-        result = getattr(result, a)
+            result = getattr(result, a)
+        except DetachedInstanceError:
+            return default
 
     return result
 
@@ -188,54 +192,121 @@ class RoastedCoffee(Base):
         back_populates="roasted_coffee",
         cascade="all, delete-orphan",
     )
-    components: AssociationProxy[list["GreenCoffee"]] = association_proxy(
+    green_coffee_components: AssociationProxy[list["GreenCoffee"]] = association_proxy(
         "component_associations",
         "green_coffee",
         creator=lambda g: CoffeeComponent(green_coffee=g),
     )
+    origin_components: AssociationProxy[list["Origin"]] = association_proxy(
+        "component_associations",
+        "origin",
+        creator=lambda o: CoffeeComponent(origin=o),
+    )
 
     def __repr__(self):
+        roaster = getdeepattr(self, "roaster.name", None)
+
         common_fields = {
             "id": getattr(self, "id", None),
             "name": getattr(self, "name", None),
         }
 
-        relationship_fields = (
-            {"roaster": getdeepattr(self, "roaster.name", None)}
-            if getattr(self, "roaster", None)
-            else {"roaster_id": getattr(self, "roaster_id", None)}
-        )
+        relationship_fields = {
+            "roaster": roaster,
+            "roaster_id": getattr(self, "roaster_id", None) if not roaster else None,
+        }
 
         return representation("RoastedCoffee", {**common_fields, **relationship_fields})
 
 
-class Origin(Base):
-    """Objects from the `roasted_coffees` table.
+class Country(Base):
+    """List of countries of the world, with coffee growing data (if available)
+
+    Required attributes:
+        id(str, PK): GENC 2A code + optional region identifier
+        name(str): short-form name
+
+    Optional attributes:
+        long_name(str): long-form name
 
     Attributes:
-        country(str, required): 2-letter country code
-        region(str)
+        processes(list[str])
+        varieties(list[str])
+        harvest_start(int)
+        harvest_end(int)
 
     Relationships:
-        coffees(list[GreenCoffee])
+        origins(list[Origin])
+        green_coffees(list[GreenCoffee])
+        coffees(list[RoastedCoffee])
+    """
+
+    __tablename__ = "countries"
+    __table_args__ = {
+        "comment": "List of countries attributed to US Dept. of State; coffee data attributed to Cafe Imports."
+    }
+
+    id: Mapped[str] = mapped_column(String(length=2), primary_key=True)
+    name: Mapped[str]
+    long_name: Mapped[str | None]
+
+    origins: Mapped[list["Origin"]] = relationship(back_populates="country")
+
+    def __repr__(self):
+        return f"Country(id={self.id}, name={self.name})"
+
+
+class Origin(Base):
+    """List of coffee growing origins
+
+    Required attributes:
+        name(str)
+        [country_id(str, FK) | country ]
+        [parent_id(int, self-referential FK) | parent ]: null means the row is a country
+
+    Relationships:
+        parent(Origin)
+        children(list[Origin])
+        country(Country)
+        green_coffees(list[GreenCoffee])
+        coffees(list[RoastedCoffee])
+
+    JSON attributes:
+        details: region-specific growing/harvest details
+
+            {
+                "processes": ["washed", "natural"],
+                "varieties": ["s795", "timor hybrid"],
+                "harvest_start": 5,
+                "harvest_end": 10
+            }
     """
 
     __tablename__ = "origins"
-    __tableargs__ = {"comment": "Geographical origins of green coffees."}
+    __table_args__ = {"comment": "Data attributed to Cafe Imports."}
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    country: Mapped[str] = mapped_column(
-        String(length=2), comment="Two letter country code (ISO 3166-1 alpha-2)"
-    )
-    region: Mapped[str | None]
+    name: Mapped[str]
+    parent_id: Mapped[int | None] = mapped_column(ForeignKey("origins.id"))
+    country_id: Mapped[str] = mapped_column(ForeignKey("countries.id"))
+    processes: Mapped[list[str] | None] = mapped_column(server_default="[]")
+    varieties: Mapped[list[str] | None] = mapped_column(server_default="[]")
+    harvest_start: Mapped[int | None]
+    harvest_end: Mapped[int | None]
+    details: Mapped[dict | None] = mapped_column(server_default="{}")
+    type: Mapped[str]
 
-    coffees: Mapped[list["GreenCoffee"]] = relationship(back_populates="origin")
+    parent: Mapped["Origin"] = relationship(back_populates="children", remote_side=[id])
+    children: Mapped[list["Origin"]] = relationship(back_populates="parent")
+    country: Mapped["Country"] = relationship(back_populates="origins")
+    green_coffees: Mapped[list["GreenCoffee"]] = relationship(back_populates="origin")
 
     def __repr__(self):
         fields = {
-            "id": getattr(self, "id", None),
-            "country": getattr(self, "country", None),
-            "region": getattr(self, "region", None),
+            "id": self.id,
+            "type": self.type,
+            "name": self.name,
+            "country_id": self.country_id,
         }
 
         return representation("Origin", fields)
@@ -246,12 +317,14 @@ class GreenCoffee(Base):
 
     Required attributes:
         name(str|None): leave null for region-generic coffees
-        [ region_id(int) | origin ]
+        [ origin_id(int) | origin ]
 
     Relationships:
         origin(Origin)
+        country(Country)
 
     Optional attributes:
+        [ region_id(int) | region ]
         process(str)
         source(str): the lowest level of traceability
         source_type(str): e.g. microlot, single estate, coop
@@ -281,7 +354,7 @@ class GreenCoffee(Base):
     name: Mapped[str | None] = mapped_column(
         comment="Green coffees without an assigned name refer to generic/unknown coffee of the specified region."
     )
-    region_id: Mapped[int | None] = mapped_column(ForeignKey("origins.id"))
+    origin_id: Mapped[int] = mapped_column(ForeignKey("origins.id"))
 
     process: Mapped[str | None]
     source: Mapped[str | None] = mapped_column(
@@ -294,11 +367,11 @@ class GreenCoffee(Base):
     varieties: Mapped[list[str]] = mapped_column(server_default="[]")
     details: Mapped[dict] = mapped_column(server_default="{}")
 
-    origin: Mapped["Origin"] = relationship(back_populates="coffees")
+    origin: Mapped["Origin"] = relationship(back_populates="green_coffees")
+    country: Mapped["Country"] = relationship(secondary="origins", viewonly=True)
 
     def __repr__(self):
-        country = getdeepattr(self, "origin.country", None)
-        region = getdeepattr(self, "origin.region", None)
+        origin_obj = getdeepattr(self, "origin")
 
         common_fields = {
             "id": getattr(self, "id"),
@@ -306,14 +379,9 @@ class GreenCoffee(Base):
         }
 
         relationship_fields = (
-            {
-                "name": common_fields["name"]
-                or f'Generic {country}{f"_{region}" if region else ""}',
-                "country": country,
-                "region": region,
-            }
-            if getattr(self, "origin", None)
-            else {"region_id": getattr(self, "region_id", None)}
+            {"origin": origin_obj.name, "country": origin_obj.country_id}
+            if origin_obj
+            else {"origin_id": getattr(self, "origin_id", None)}
         )
 
         return representation("GreenCoffee", {**common_fields, **relationship_fields})
@@ -324,18 +392,30 @@ class CoffeeComponent(Base):
 
     Required attributes:
         [ roasted_id(int) | roasted_coffee(RoastedCoffee) ]: PK
-        [ green_id(int) | green_coffee(GreenCoffee) ]: PK
+
+    Requires one of:
+        [ green_id(int) | green_coffee(GreenCoffee) ]: null for origin-generic coffee
+        origin_id(int): only required for origin-generic coffee
 
     Relationships:
         roasted_coffee(RoastedCoffee)
         green_coffee(GreenCoffee)
+        origin(Origin)
 
     Optional attributes:
+        process(str)
         fraction(int): percentage
         date_added(datetime, server default)
         date_updated(datetime, server default)
         date_removed(datetime)
 
+    JSON attributes:
+        details
+
+            {
+                "name": green coffee name, if it is not included in the `green_coffees` table
+                "region": region name, if it is not included in the `origins` table
+            }
     """
 
     __tablename__ = "roasted_coffee_components"
@@ -343,12 +423,12 @@ class CoffeeComponent(Base):
         "comment": "Association table linking roasted coffees and green coffees."
     }
 
-    roasted_id: Mapped[int] = mapped_column(
-        ForeignKey("roasted_coffees.id"), primary_key=True
-    )
-    green_id: Mapped[int] = mapped_column(
-        ForeignKey("green_coffees.id"), primary_key=True
-    )
+    id: Mapped[int] = mapped_column(primary_key=True)
+    roasted_id: Mapped[int] = mapped_column(ForeignKey("roasted_coffees.id"))
+    green_id: Mapped[int | None] = mapped_column(ForeignKey("green_coffees.id"))
+    origin_id: Mapped[int | None] = mapped_column(ForeignKey("origins.id"))
+    process: Mapped[str | None]
+
     fraction: Mapped[int | None] = mapped_column(
         comment="Percentage of blend constituted by green coffee."
     )
@@ -358,41 +438,43 @@ class CoffeeComponent(Base):
     )
     date_removed: Mapped[datetime | None]
 
+    details: Mapped[dict | None] = mapped_column(server_default="{}")
+
+    origin: Mapped["Origin"] = relationship()
     green_coffee: Mapped["GreenCoffee"] = relationship()
     roasted_coffee: Mapped["RoastedCoffee"] = relationship(
         back_populates="component_associations"
     )
 
     def __repr__(self):
-        country = getdeepattr(self, "green_coffee.origin.country", None)
-        region = getdeepattr(self, "green_coffee.origin.region", None)
+        roasted_coffee_name = getdeepattr(self, "roasted_coffee.name", None)
+        green_coffee_name = getdeepattr(self, "green_coffee.name", None)
+        green_coffee_origin = getdeepattr(self, "green_coffee.origin.name", None)
+        country_id = getdeepattr(
+            self,
+            "green_coffee.origin.country_id",
+            getdeepattr(self, "origin.country_id", None),
+        )
+        origin_name = getdeepattr(self, "origin.name", None)
 
         relationship_fields = {
-            **(
-                {"roasted_coffee": getdeepattr(self, "roasted_coffee.name", None)}
-                if getattr(self, "roasted_coffee", None)
-                else {"roasted_id": (getattr(self, "roasted_id"))}
+            "roasted_coffee": roasted_coffee_name,
+            "roasted_id": (
+                getattr(self, "roasted_id") if roasted_coffee_name is None else None
             ),
-            **(
-                {
-                    "green_coffee": getdeepattr(self, "green_coffee.name", None)
-                    or (
-                        f'Generic {country}{f"_{region}" if region else ""}'
-                        if country
-                        else None
-                    )
-                }
-                if getattr(self, "green_coffee")
-                else {"green_id": (getattr(self, "green_id"))}
+            "green_coffee": green_coffee_name,
+            "green_id": (
+                getattr(self, "green_id") if green_coffee_name is None else None
             ),
+            "origin": green_coffee_origin or origin_name,
+            "origin_id": (getattr(self, "origin_id") if not origin_name else None),
+            "country_id": country_id,
         }
 
         common_fields = {
-            "country": country,
-            "region": region,
-            "fraction": getattr(self, "fraction", None),
+            "fraction": getattr(self, "fraction"),
         }
 
         return representation(
-            "CoffeeComponent", {**relationship_fields, **common_fields}
+            "CoffeeComponent", {"id": self.id, **relationship_fields, **common_fields}
         )

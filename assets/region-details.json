@@ -1,0 +1,50 @@
+[
+  {
+    "country_id": "ID",
+    "region_name": "Bali",
+    "processes": ["washed", "natural"],
+    "varieties": ["s795", "timor hybrid"],
+    "harvest_start": 5,
+    "harvest_end": 10
+  },
+  {
+    "country_id": "ID",
+    "region_name": "Flores",
+    "processes": ["washed", "natural"],
+    "varieties": ["kartika", "caturra", "timor hybrid"],
+    "harvest_start": 5,
+    "harvest_end": 7
+  },
+  {
+    "country_id": "ID",
+    "region_name": "Java",
+    "processes": ["wet-hulled"],
+    "varieties": ["ateng", "catimor", "tim tim", "typica"],
+    "harvest_start": 7,
+    "harvest_end": 9
+  },
+  {
+    "country_id": "ID",
+    "region_name": "Sulawesi",
+    "processes": ["washed", "wet-hulled"],
+    "varieties": ["jember", "typica", "s795"],
+    "harvest_start": 5,
+    "harvest_end": 11 
+  },
+  {
+    "country_id": "ID",
+    "region_name": "Sumatra",
+    "processes": ["wet-hulled"],
+    "varieties": ["bourbon", "catimor", "caturra", "tim tim"],
+    "harvest_start": 5,
+    "harvest_end": 11 
+  },
+  {
+    "country_id": "US",
+    "region_name": "Hawaii",
+    "processes": ["washed"],
+    "varieties": ["bourbon", "typica"],
+    "harvest_start": 8,
+    "harvest_end": 12 
+  }
+]

@@ -1,9 +1,16 @@
 #!/usr/bin/env python3
 import os, argparse, json
-from sqlalchemy import select
+from sqlalchemy import select, func, and_
 from sqlalchemy.orm import Session
 from db.main import engine
-from db.models import Origin, Roaster, RoastedCoffee, GreenCoffee, CoffeeComponent
+from db.models import (
+    Country,
+    Origin,
+    Roaster,
+    RoastedCoffee,
+    GreenCoffee,
+    CoffeeComponent,
+)
 from db.utilities import is_in_model
 
 
@@ -23,28 +30,29 @@ def main():
         data = json.loads(text)
 
     with Session(engine) as session:
-        for country, regions in data["origins"].items():
-            for region in regions:
-                session.add(Origin(country=country, region=region))
-
-        for green_data in data["green_coffees"]:
+        for green_data in data.get("green_coffees", []):
             origin_data = green_data.get("origin")
-            country = origin_data.get("country")
-            region = origin_data.get("region")
+            country_id = origin_data.get("country")
+            region_name = origin_data.get("region")
             community = origin_data.get("community")
+            details = green_data.get("details")
 
-            origin = (
-                (
-                    session.scalar(
-                        select(Origin).where(
-                            Origin.country == country, Origin.region == region
-                        )
+            country = session.get(Country, country_id)
+
+            if not country:
+                raise ValueError
+
+            if region_name:
+                origin = session.scalar(
+                    select(Origin).where(
+                        func.lower(Origin.name) == func.lower(region_name)
                     )
-                    or Origin(country=country, region=region)
                 )
-                if country
-                else None
-            )
+
+                if not origin:
+                    details["region"] = region_name
+            else:
+                origin = next(o for o in country.origins if o.name == country.name)
 
             green_coffee = GreenCoffee(
                 **{
@@ -55,6 +63,7 @@ def main():
                     },
                     "origin": origin,
                     "community": community,
+                    "details": details or {},
                 }
             )
 
@@ -67,7 +76,7 @@ def main():
 
             session.add(roaster)
 
-            for coffee_data in roaster_data["roasted_coffees"]:
+            for coffee_data in roaster_data.get("roasted_coffees", []):
                 coffee = RoastedCoffee(
                     **{
                         k: v
@@ -80,70 +89,70 @@ def main():
                     # Find or create the `GreenCoffee` object corresponding to
                     # the component, and associate it to the `RoastedCoffee`.
 
-                    component = None
-
-                    if name := component_data.get("name"):
-                        # If component name is known, get the `GreenCoffee`
-                        # object. If it doesn't exist, set the component to a
-                        # generic `GreenCoffee` for the region.
-
-                        component = session.scalar(
-                            select(GreenCoffee).where(GreenCoffee.name == name)
-                        )
-
-                    if not component and (country := component_data.get("country")):
-                        # If the country and/or region are known, try to get the
-                        # generic `GreenCoffee` object for the region and process.
-
-                        region = component_data.get("region")
-                        process = component_data.get("process")
-
-                        # Try to get the `Origin` object for the region.
-                        origin = session.scalar(
-                            select(Origin).where(
-                                Origin.country == country, Origin.region == region
-                            )
-                        )
-
-                        if not origin:
-                            # If the `Origin` entry does not exist, create both
-                            # the `Origin` and region-generic `GreenCoffee`
-                            # objects.
-
-                            origin = Origin(country=country, region=region)
-                            component = GreenCoffee(
-                                process=process,
-                                origin=origin,
-                            )
-
-                        else:
-                            # Try to get the generic `GreenCoffee` object for
-                            # the region and process. If it does not exist, create it.
-
-                            component = session.scalar(
-                                select(GreenCoffee).where(
-                                    GreenCoffee.name == None,
-                                    GreenCoffee.process == process,
-                                    GreenCoffee.origin == origin,
-                                )
-                            ) or GreenCoffee(
-                                process=process,
-                                origin=origin,
-                            )
-
-                    # Associate the `GreenCoffee` object to the `RoastedCoffee`.
+                    name = component_data.get("name")
                     fraction = (
                         100
                         if not coffee_data.get("is_blend")
                         else component_data.get("fraction")
                     )
-                    coffee.component_associations.append(
-                        CoffeeComponent(
-                            roasted_coffee=coffee,
-                            green_coffee=component,
-                            fraction=fraction,
+
+                    # If component name is known, try to find and assign the
+                    # respective `GreenCoffee` object.
+                    component = (
+                        session.scalar(
+                            select(GreenCoffee).where(GreenCoffee.name == name)
                         )
+                        if name
+                        else None
                     )
+
+                    if component:
+                        coffee.component_associations.append(
+                            CoffeeComponent(
+                                roasted_coffee=coffee,
+                                green_coffee=component,
+                                fraction=fraction,
+                            )
+                        )
+
+                    else:
+                        # Create a component association with the origin.
+
+                        country_id = component_data.get("country")
+                        region_name = component_data.get("region")
+                        process = component_data.get("process")
+                        details = {}
+
+                        if name:
+                            details["name"] = name
+
+                        # Try to find `Origin` object for the region.
+                        origin = session.scalar(
+                            select(Origin).where(Origin.name == region_name)
+                        )
+
+                        if not origin:
+                            # Try to find `Origin` object for the country.
+                            origin = session.scalar(
+                                select(Origin)
+                                .join(Origin.country)
+                                .where(
+                                    Origin.country_id == country_id,
+                                    Origin.name == Country.name,
+                                )
+                            )
+
+                            if region_name:
+                                details["region"] = region_name
+
+                        coffee.component_associations.append(
+                            CoffeeComponent(
+                                roasted_coffee=coffee,
+                                process=process,
+                                origin=origin,
+                                fraction=fraction,
+                            )
+                        )
 
                 # Associate the `RoastedCoffee` object to the `Roaster`.
                 roaster.coffees.append(coffee)
