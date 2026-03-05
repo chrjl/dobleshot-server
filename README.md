@@ -2,7 +2,7 @@
 
 A GraphQL API &times; SQL backend for a coffee experience-centered social networking app.
 
-## Development
+## Usage
 
 ### Set up python virtual environment
 
@@ -15,6 +15,21 @@ python -m venv .venv
 source .venv/bin/activate
 pip install -e .
 ```
+
+### Run the server
+
+```console
+APP_ENV=development python -m server.main
+```
+
+Application environment (e.g. `development`, `production`) is set by `APP_ENV` environment variable, defaults to `development`. The application loads from `dotenv` files specified by the environment (e.g. `.env.production`, `.env.development`) for database connection parameters, server options, etc.; development environment falls back to `.env`.
+
+The following executable scripts are provided:
+
+- `start`: runs the main server script
+- `serve-dev`: ignores `APP_ENV` and runs the development server
+
+## Development
 
 ### Set up a development database
 
@@ -39,3 +54,32 @@ Migrate tables and (optionally) seed initial entries
 alembic upgrade head
 bin/seed.py --json sample-data.json
 ```
+
+### Set up an in-memory database for testing
+
+- Create in-memory SQLite engine
+- Import the SQLAlchemy `MetaData` object
+- Create tables from the models stored in the `MetaData` object
+
+```python
+from db.models import Base
+
+engine = sqlalchemy.create_engine("sqlite://", echo=True)
+Base.metadata.create_all(engine)
+```
+
+# Attributions
+
+- List of countries
+
+  US Department of State, Bureau of Intelligence and Research  
+  Independent States in the World Fact Sheet  
+  Link: https://www.state.gov/independent-states-in-the-world/  
+  Published: March 12, 2025  
+  Accessed: January 30, 2026
+
+- Information about coffee-growing countries, list of coffee-growing regions
+
+  Cafe Imports  
+  Link: https://www.cafeimports.com/north-america/blog/origins/  
+  Accessed: January 31, 2026
