@@ -2,18 +2,21 @@
 name = "dobleshot-server"
 version = "0.0.0"
 dependencies = [
-  "python-dotenv >= 1.2.1",
-  "sqlalchemy >= 2.0.44",
-  "psycopg2-binary >= 2.9.11",
-  "ariadne >= 0.25",
-  "starlette >= 0.52.1",
-  "uvicorn >= 0.40.0",
+  "python-dotenv >= 1.2.2",
+  "sqlalchemy >= 2.0.49",
+  "psycopg2-binary >= 2.9.12",
+  "ariadne >= 1.0.1",
+  "starlette >= 1.0.0",
+  "uvicorn >= 0.45.0",
+  "unidecode >= 1.4.0",
 ]
 readme = "README.md"
 
 [project.optional-dependencies]
 dev = [
-  "alembic >= 1.17.2",
+  "alembic >= 1.18.4",
+  "pytest >= 9.0.3",
+  "requests >= 2.33.1",
   "watchfiles >= 1.1.1",
 ]
 
