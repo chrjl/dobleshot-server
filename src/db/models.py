@@ -1,4 +1,4 @@
-from sqlalchemy import ForeignKey, JSON, String, select, func
+from sqlalchemy import ForeignKey, JSON, String, select, func, Integer, Text
 from sqlalchemy.orm import (
     DeclarativeBase,
     Mapped,
@@ -45,6 +45,7 @@ def representation(title: str, fields: dict[str, Any]) -> str:
 
 
 class Base(DeclarativeBase):
+    id = mapped_column("id", String)
     type_annotation_map = {
         list[str]: MutableList.as_mutable(JSON),
         list[dict]: MutableList.as_mutable(JSON),

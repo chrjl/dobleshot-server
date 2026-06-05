@@ -18,7 +18,6 @@ from bin.seed_countries_regions import (
     generate_origin_objects,
 )
 
-
 # revision identifiers, used by Alembic.
 revision: str = "e3ff81cf0bba"
 down_revision: Union[str, Sequence[str], None] = "052eae0af0e0"
@@ -117,9 +116,9 @@ def upgrade() -> None:
                 .where(origins_table.c.name == o.name)
                 .values(
                     {
-                        "parent_id": sa.select(origins_table.c.id).where(
-                            origins_table.c.name == parent_obj.name
-                        ).scalar_subquery()
+                        "parent_id": sa.select(origins_table.c.id)
+                        .where(origins_table.c.name == parent_obj.name)
+                        .scalar_subquery()
                     }
                 )
             )
@@ -165,16 +164,13 @@ def upgrade() -> None:
     # Refactor green_coffees × roasted_coffee_components
     # Refactor anonymous green coffees into origin_id × process in components table
     # Remove anonymous green coffees from green_coffees table
-    op.drop_constraint("roasted_coffee_components_pkey", "roasted_coffee_components")
     op.add_column(
         "roasted_coffee_components",
-        sa.Column(
-            "id",
-            sa.Integer,
-            primary_key=True,
-            autoincrement=True,
-            nullable=False,
-        ),
+        sa.Column("id", sa.Integer, autoincrement=True, nullable=False),
+    )
+    op.drop_constraint("roasted_coffee_components_pkey", "roasted_coffee_components")
+    op.create_primary_key(
+        "roasted_coffee_components_pkey", "roasted_coffee_components", ["id"]
     )
     op.add_column(
         "roasted_coffee_components",
@@ -183,6 +179,10 @@ def upgrade() -> None:
     op.add_column(
         "roasted_coffee_components",
         sa.Column("process", sa.String, nullable=True),
+    )
+    op.add_column(
+        "roasted_coffee_components",
+        sa.Column("variety", sa.String, nullable=True),
     )
     op.add_column(
         "roasted_coffee_components",
