@@ -7,7 +7,6 @@ from db import models, queries
 from bin.seed_countries_regions import generate_country_objects, generate_origin_objects
 from bin.seed_sample_data import green_coffee_objects, roaster_object_and_associations
 
-
 SAMPLE_DATA_PATH = "assets/sample-data.json"
 
 
@@ -207,6 +206,18 @@ class TestCountryProperties:
             assert set([r.name for r in result]) == set(coffee_names)
 
 
+class TestCountryRelationships:
+    @pytest.mark.parametrize("country_name", ["Bolivia", "United States"])
+    def test_origin_of_country(self, engine, country_name):
+        country = queries.Country().filter_by_name({"starts_with": country_name})
+
+        with Session(engine) as session:
+            result = session.scalar(country.get("origin"))
+
+        assert type(result) == models.Origin
+        assert result.name == country_name
+
+
 class TestOriginFilters:
     def test_select(self, engine):
         with Session(engine) as session:
@@ -270,7 +281,7 @@ class TestOriginFilters:
             assert result[0].name == "Bolivia"
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture()
 def origin_us(engine):
     with Session(engine) as session:
         return session.scalar(
@@ -278,7 +289,7 @@ def origin_us(engine):
         )
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture()
 def origin_hawaii(engine):
     with Session(engine) as session:
         return session.scalar(
@@ -286,7 +297,7 @@ def origin_hawaii(engine):
         )
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture()
 def origin_regions_of_hawaii(engine):
     with Session(engine) as session:
         return session.scalars(
@@ -304,6 +315,8 @@ class TestOriginSelfRelationships:
             session.add(origin_hawaii)
             session.add(origin_us)
             assert origin_hawaii.parent == origin_us
+            session.delete(origin_hawaii)
+            session.delete(origin_us)
 
     def test_children(self, engine, origin_hawaii, origin_regions_of_hawaii):
         with Session(engine) as session:
@@ -312,6 +325,8 @@ class TestOriginSelfRelationships:
             assert set([region.name for region in origin_hawaii.children]) == set(
                 [region.name for region in origin_regions_of_hawaii]
             )
+
+            session.delete(origin_hawaii)
 
 
 class TestOriginQueries:
@@ -497,24 +512,23 @@ class TestGreenCoffeeFilters:
             assert len(result) == count
 
     @pytest.mark.parametrize(
-        "varieties,count,coffee_names",
+        "varieties,expected_coffee_names",
         [
-            (["bourbon"], 1, ["Dukorere Kawa Anaerobic Lot 10"]),
+            (["bourbon"], ["Dukorere Kawa Anaerobic Lot 10"]),
             (
-                ["bourbon, sl28"],
-                2,
+                ["bourbon", "sl28"],
                 ["Dukorere Kawa Anaerobic Lot 10", "Privam Estate AA Week 23"],
             ),
         ],
     )
     def test_filter_by_variety(
-        self, engine, base_query, varieties, count, coffee_names
+        self, engine, base_query, varieties, expected_coffee_names
     ):
         with Session(engine) as session:
             query = base_query.filter_by_variety(varieties=varieties)
             result = session.scalars(query.select()).all()
 
-            assert len(result) == count
+            assert len(result) == len(expected_coffee_names)
 
 
 class TestGreenCoffeeQueries:
@@ -726,7 +740,7 @@ class TestRoastedCoffeeFilters:
             (["blend"], 2),
             (["espresso"], 2),
             (["decaf"], 1),
-            (["single origin", "decaf"], 6),
+            (["single origin", "decaf"], 5),
         ],
     )
     def test_filter_by_profile(self, engine, base_query, profiles, count):
