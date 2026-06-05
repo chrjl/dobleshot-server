@@ -13,8 +13,8 @@ if TYPE_CHECKING:
 
 
 class CoffeeComponent(Base[models.CoffeeComponent]):
-    def __init__(self):
-        super().__init__(models.CoffeeComponent)
+    def __init__(self, *ids: int):
+        super().__init__(models.CoffeeComponent, *ids)
 
     def filter_by_roasted_coffee(
         self,

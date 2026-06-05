@@ -4,6 +4,7 @@ from sqlalchemy import select, join, func, and_, or_
 from .base import Base
 from db import models
 from db.queries.component_associations import CoffeeComponent
+from db.utilities import normalized_text
 
 from typing import TYPE_CHECKING
 
@@ -13,10 +14,40 @@ if TYPE_CHECKING:
 
 
 class RoastedCoffee(Base[models.RoastedCoffee]):
-    def __init__(self):
-        super().__init__(models.RoastedCoffee)
+    def __init__(self, *ids: int):
+        super().__init__(models.RoastedCoffee, *ids)
+
+    def filter_by_tag(self, tag_name: str, values: list[str] = []) -> Self:
+        self._joins.append(
+            join(
+                models.RoastedCoffee,
+                models.RoastedCoffeeTag,
+                models.RoastedCoffee.id == models.RoastedCoffeeTag.roasted_id,
+            )
+        )
+
+        self._filters.append(
+            and_(
+                func.lower(models.RoastedCoffeeTag.value).in_(
+                    [normalized_text(value) for value in values]
+                ),
+                models.RoastedCoffeeTag.type == tag_name,
+            )
+        )
+
+        return self
+
+    def filter_by_profile(self, profiles: list[str] = []) -> Self:
+        self.filter_by_tag("profile", profiles)
+        return self
+
+    def filter_by_tasting(self, tasting_notes: list[str] = []) -> Self:
+        self.filter_by_tag("tasting", tasting_notes)
+        return self
 
     def filter_by_process(self, processes: list[str] = []) -> Self:
+        processes = [normalized_text(process) for process in processes]
+
         self._joins.append(
             join(
                 models.RoastedCoffee,
@@ -46,6 +77,8 @@ class RoastedCoffee(Base[models.RoastedCoffee]):
         return self
 
     def filter_by_variety(self, varieties: list[str] = []) -> Self:
+        varieties = [normalized_text(variety) for variety in varieties]
+
         self._joins.append(
             join(
                 models.RoastedCoffee,
@@ -64,29 +97,13 @@ class RoastedCoffee(Base[models.RoastedCoffee]):
 
         self._filters.append(
             or_(
-                models.CoffeeComponent.details["variety"].in_(varieties),
+                func.lower(models.CoffeeComponent.details["variety"].as_string()).in_(
+                    varieties
+                ),
                 and_(
-                    models.GreenCoffeeTag.value.in_(varieties),
+                    func.lower(models.GreenCoffeeTag.value).in_(varieties),
                     models.GreenCoffeeTag.type == "variety",
                 ),
-            )
-        )
-
-        return self
-
-    def filter_by_profile(self, profiles: list[str] = []) -> Self:
-        self._joins.append(
-            join(
-                models.RoastedCoffee,
-                models.RoastedCoffeeTag,
-                models.RoastedCoffee.id == models.RoastedCoffeeTag.roasted_id,
-            )
-        )
-
-        self._filters.append(
-            and_(
-                models.RoastedCoffeeTag.type == "profile",
-                models.RoastedCoffeeTag.value.in_(profiles),
             )
         )
 
@@ -177,4 +194,8 @@ class RoastedCoffee(Base[models.RoastedCoffee]):
         )
 
     def associations(self) -> Select[tuple[models.CoffeeComponent]]:
+        return select(models.CoffeeComponent).where(
+            models.CoffeeComponent.roasted_id.in_(self.select(["id"]))
+        )
         return CoffeeComponent().filter_by_roasted_coffee(self.select(["id"])).select()
+

@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-from sqlalchemy import select, join, and_
+from sqlalchemy import select, join, and_, func
 from .base import Base
 from db import models
 from db.queries.component_associations import CoffeeComponent
+from db.utilities import normalized_text
 
 from typing import TYPE_CHECKING
 
@@ -13,10 +14,10 @@ if TYPE_CHECKING:
 
 
 class GreenCoffee(Base[models.GreenCoffee]):
-    def __init__(self):
-        super().__init__(models.GreenCoffee)
+    def __init__(self, *ids: int):
+        super().__init__(models.GreenCoffee, *ids)
 
-    def filter_by_process(self, processes: list[str] = []) -> Self:
+    def filter_by_tag(self, tag_name: str, values: list[str] = []) -> Self:
         self._joins.append(
             join(
                 models.GreenCoffee,
@@ -27,29 +28,25 @@ class GreenCoffee(Base[models.GreenCoffee]):
 
         self._filters.append(
             and_(
-                models.GreenCoffeeTag.value.in_(processes),
-                models.GreenCoffeeTag.type == "process",
+                func.lower(models.GreenCoffeeTag.value).in_(
+                    [normalized_text(value) for value in values]
+                ),
+                models.GreenCoffeeTag.type == tag_name,
             )
         )
 
         return self
 
+    def filter_by_process(self, processes: list[str] = []) -> Self:
+        self.filter_by_tag("process", processes)
+        return self
+
     def filter_by_variety(self, varieties: list[str] = []) -> Self:
-        self._joins.append(
-            join(
-                models.GreenCoffee,
-                models.GreenCoffeeTag,
-                models.GreenCoffee.id == models.GreenCoffeeTag.green_id,
-            )
-        )
+        self.filter_by_tag("variety", varieties)
+        return self
 
-        self._filters.append(
-            and_(
-                models.GreenCoffeeTag.value.in_(varieties),
-                models.GreenCoffeeTag.type == "variety",
-            )
-        )
-
+    def filter_by_tasting(self, tasting_notes: list[str] = []) -> Self:
+        self.filter_by_tag("tasting", tasting_notes)
         return self
 
     def origins(self) -> Select[tuple[models.Origin]]:
@@ -80,7 +77,7 @@ class GreenCoffee(Base[models.GreenCoffee]):
     def roasters(self) -> Select[tuple[models.Roaster]]:
         return (
             select(models.Roaster)
-            .distinct()
+            .group_by(models.Roaster.id)
             .join_from(models.Roaster, models.RoastedCoffee)
             .join_from(models.RoastedCoffee, models.CoffeeComponent)
             .join_from(models.CoffeeComponent, models.GreenCoffee)
@@ -88,4 +85,7 @@ class GreenCoffee(Base[models.GreenCoffee]):
         )
 
     def associations(self) -> Select[tuple[models.CoffeeComponent]]:
+        return select(models.CoffeeComponent).where(
+            models.CoffeeComponent.green_id.in_(self.select(["id"]))
+        )
         return CoffeeComponent().filter_by_green_coffee(self.select(["id"])).select()

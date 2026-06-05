@@ -13,8 +13,8 @@ if TYPE_CHECKING:
 
 
 class Country(Base[models.Country]):
-    def __init__(self):
-        super().__init__(models.Country)
+    def __init__(self, *ids: str):
+        super().__init__(models.Country, *ids)
 
     def filter_by_name(self, filter: NameFilter, name_column="name"):
         return super().filter_by_name(filter, name_column)
@@ -24,7 +24,10 @@ class Country(Base[models.Country]):
 
         See also: `suborigins`
         """
-        pass
+
+        return select(models.Origin).where(
+            models.Origin.id.in_(self.select(["origin_id"]))
+        )
 
     def suborigins(self):
         """List of suborigin `Origin` objects of a `Country`, inclusive."""

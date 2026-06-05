@@ -18,6 +18,13 @@ class CoffeeFilter(TypedDict, total=False):
     varieties: list[str]
 
 
+class LocationFilter(TypedDict, total=False):
+    city: str
+    state: str
+    country_code: str
+    country_name: str
+
+
 class Filter(NameFilter, CoffeeFilter):
     pass
 
@@ -99,6 +106,32 @@ def coffee_filter_clauses(filter: CoffeeFilter) -> list[ColumnElement]:
                     [normalized_text(v) for v in varieties]
                 ),
             ),
+        )
+
+    return filter_clauses
+
+
+def location_filter_clauses(filter: LocationFilter) -> list[ColumnElement]:
+    filter_clauses: list[ColumnElement] = []
+
+    if city := filter.get("city"):
+        filter_clauses.append(
+            func.lower(models.Roaster.city).like(city.lower() + "%"),
+        )
+
+    if state := filter.get("state"):
+        filter_clauses.append(
+            func.lower(models.Roaster.state).like(state.lower() + "%"),
+        )
+
+    if country_code := filter.get("country_code"):
+        filter_clauses.append(
+            func.lower(models.Roaster.country).like(country_code.lower() + "%"),
+        )
+
+    if country_name := filter.get("country_name"):
+        filter_clauses.append(
+            func.lower(models.Country.name).like(country_name.lower() + "%"),
         )
 
     return filter_clauses

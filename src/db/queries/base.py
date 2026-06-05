@@ -16,21 +16,26 @@ T = TypeVar("T", bound=models.Base)
 
 
 class Base(Generic[T]):
-    def __init__(self, model: Type[T]):
+    def __init__(self, model: Type[T], *ids: str | int):
         self._model = model
         self._filters: list[ColumnElement] = []
         self._joins: list[Join] = []
+
+        if ids:
+            self.filter_by_ids(ids)
 
     def select(self, columns: list[str] | None = None) -> Select[tuple[T]]:
         if columns is None:
             return (
                 select(self._model)
+                .group_by(self._model.id)
                 .select_from(self._model, *self._joins)
                 .where(*self._filters)
             )
 
         return (
             select(*[getattr(self._model, c) for c in columns])
+            .group_by(self._model.id)
             .select_from(self._model, *self._joins)
             .where(*self._filters)
         )

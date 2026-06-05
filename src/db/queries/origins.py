@@ -47,8 +47,8 @@ def suborigin_ids_cte(origin_ids: list[int] | BindParameter | Select) -> CTE:
 
 
 class Origin(Base[models.Origin]):
-    def __init__(self):
-        super().__init__(models.Origin)
+    def __init__(self, *ids: int):
+        super().__init__(models.Origin, *ids)
 
     def suborigin_ids(self) -> Select[tuple[int]]:
         return select(suborigin_ids_cte(origin_ids=self.select(["id"])))
